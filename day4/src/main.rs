@@ -1,4 +1,3 @@
-use std::collections::HashMap;
 use std::fs::File;
 use std::io::{self, BufRead};
 use std::path::Path;
@@ -23,19 +22,19 @@ fn main() {
     let input_file = "src/sampleinput.txt";
 
     if let Ok(lines) = read_lines(input_file) {
-        let mut cards: HashMap<usize, [Vec<usize>; 2]> = HashMap::<usize, [Vec<usize>; 2]>::new();
+        let mut cards: Vec<Card> = vec![];
 
         for line in lines {
             if let Ok(ip) = line {
-                // Card 205: 54 17 93 26 35  9 61 49 81 42 | 94 14 76 52 15 18 38 41 69 28 16 31 73 32 47 37 71 23 82 90 33 75 24 85 11
                 let card_id = ip
-                    .replace("Card ", "")
+                    .replace("Card", "")
+                    .replace(" ", "")
                     .split(':')
                     .nth(0)
                     .unwrap()
                     .parse::<usize>()
                     .unwrap() as usize;
-                let winning_numbers: Vec<usize> = ip
+                let winning_numbers = ip
                     .split(':')
                     .nth(1)
                     .unwrap()
@@ -43,9 +42,10 @@ fn main() {
                     .nth(0)
                     .unwrap()
                     .replace("  ", " ")
-                    .split(" ")
+                    .trim()
+                    .split(' ')
                     .map(|x| x.parse::<usize>().unwrap())
-                    .collect();
+                    .collect::<Vec<usize>>();
                 let card_numbers: Vec<usize> = ip
                     .split(':')
                     .nth(1)
@@ -54,24 +54,43 @@ fn main() {
                     .nth(1)
                     .unwrap()
                     .replace("  ", " ")
-                    .split(" ")
+                    .trim()
+                    .split(' ')
                     .map(|x| x.parse::<usize>().unwrap())
-                    .collect();
-                cards.insert(card_id, [winning_numbers, card_numbers]);
+                    .collect::<Vec<usize>>();
+                cards.push(Card::new(card_id, winning_numbers, card_numbers));
             }
         }
 
         // Part 1
-        let mut winning_card_score_sum: usize = 0;
+        let winning_card_score_sum: usize = cards.iter().map(|x| x.part_1_score).sum();
+        println!("Answer: {winning_card_score_sum}");
 
-        //for digit in 0..number_info[3] {
-
-        for i in 1..cards.len() {
-            let mut winning_number_count: usize = 0;
-            let thing = &cards[&i];
-            //Card 1: 41 48 83 86 17 | 83 86  6 31 17  9 48 53
-            println!("Card {}: {} | {}", i, 2, 2);
+        // Part 2
+        loop {
+            let mut new_cards: Vec<Card> = vec![];
+            for card in cards.iter_mut() {
+                if !card.processed {
+                    for i in 0..card.winning_numbers_count {
+                        let winners = &card.winners;
+                        let card_numbers = &card.card_numbers;
+                        new_cards.push(Card::new(
+                            card.number + i,
+                            winners.to_vec(),
+                            card_numbers.to_vec(),
+                        ));
+                        card.processed = true;
+                    }
+                }
+            }
+            match new_cards.len() > 0 {
+                true => {
+                    cards.append(&mut new_cards);
+                }
+                false => break,
+            }
         }
+        println!("Answer: {}", cards.len());
     }
 }
 
@@ -81,4 +100,39 @@ where
 {
     let file = File::open(filename)?;
     Ok(io::BufReader::new(file).lines())
+}
+
+struct Card {
+    number: usize,
+    winners: Vec<usize>,
+    card_numbers: Vec<usize>,
+    winning_numbers_count: usize,
+    part_1_score: usize,
+    processed: bool,
+}
+
+impl Card {
+    pub fn new(number: usize, winners: Vec<usize>, card_numbers: Vec<usize>) -> Self {
+        let winning_numbers_count = card_numbers
+            .iter()
+            .map(|x| match winners.contains(x) {
+                true => 1,
+                _ => 0,
+            })
+            .sum();
+
+        let part_1_score = match winning_numbers_count > 0 {
+            true => usize::pow(2, winning_numbers_count as u32 - 1),
+            false => 0,
+        };
+
+        Card {
+            number,
+            winners,
+            card_numbers,
+            winning_numbers_count,
+            part_1_score,
+            processed: false,
+        }
+    }
 }
