@@ -43,7 +43,6 @@ fn main() {
 
     if let Ok(lines) = read_lines(input_file) {
         i = 0;
-        let mut number_count = 0 as usize;
         for line in lines {
             if let Ok(ip) = line {
                 // Set the engine schematic
@@ -58,10 +57,6 @@ fn main() {
                         if last_character_digit != true {
                             // replace all non numeric or . characters and grab
                             // the first match based on our window
-                            //....90*12...
-                            //....9012...
-
-                            //    90 12
                             let re = Regex::new(r"[^0-9]").unwrap();
                             let number =
                                 String::from(re.replace_all(&ip[current_character_index..], " "))
@@ -76,7 +71,6 @@ fn main() {
                                 number,
                                 number.to_string().len(),
                             ]);
-                            number_count += 1;
                         }
                         last_character_digit = true;
                     } else {
