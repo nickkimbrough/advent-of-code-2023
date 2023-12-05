@@ -19,7 +19,7 @@ use std::path::Path;
    Part 2 probably has some sort of trap I'm not thinking of.
 */
 fn main() {
-    let input_file = "src/sampleinput.txt";
+    let input_file = "src/input.txt";
 
     if let Ok(lines) = read_lines(input_file) {
         let mut cards: Vec<Card> = vec![];
@@ -69,28 +69,34 @@ fn main() {
         // Part 2
         let initial_card_count: usize = cards.len();
         loop {
-            let mut new_cards: Vec<Card> = vec![];
+            let mut card_numbers_to_duplicate: Vec<usize> = vec![];
             for card in cards.iter_mut() {
                 if !card.processed {
-                    for i in 0..card.winning_numbers_count {
+                    for i in 1..card.winning_numbers_count + 1 {
                         if card.number + i <= initial_card_count {
-                            let winners = &card.winners;
-                            let card_numbers = &card.card_numbers;
-                            new_cards.push(Card::new(
-                                card.number + i,
-                                winners.to_vec(),
-                                card_numbers.to_vec(),
-                            ));
+                            card_numbers_to_duplicate.push(card.number + i);
                         }
                     }
                     card.processed = true;
                 }
             }
-            match new_cards.len() > 0 {
-                true => {
-                    cards.append(&mut new_cards);
+
+            if card_numbers_to_duplicate.len() > 0 {
+                for card_number_to_duplicate in card_numbers_to_duplicate {
+                    let card_to_duplicate = cards
+                        .iter()
+                        .filter(|x| x.number == card_number_to_duplicate)
+                        .nth(0)
+                        .unwrap();
+
+                    cards.push(Card::new(
+                        card_number_to_duplicate,
+                        card_to_duplicate.winners.to_vec(),
+                        card_to_duplicate.card_numbers.to_vec(),
+                    ));
                 }
-                false => break,
+            } else {
+                break;
             }
         }
         println!("Answer: {}", cards.len());
