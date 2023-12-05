@@ -1,4 +1,3 @@
-use std::collections::HashMap;
 use std::fs::File;
 use std::io::{self, BufRead};
 use std::path::Path;
@@ -72,14 +71,12 @@ where
 
 struct AlmanacMap {
     source_maps: Vec<[usize; 3]>,
-    source_map_mappings: HashMap<usize, usize>,
 }
 
 impl AlmanacMap {
     fn default() -> AlmanacMap {
         AlmanacMap {
             source_maps: vec![],
-            source_map_mappings: HashMap::new(),
         }
     }
 
@@ -87,27 +84,19 @@ impl AlmanacMap {
         let mut new_almanac_map: AlmanacMap = AlmanacMap::default();
 
         new_almanac_map.source_maps = source_maps;
-        new_almanac_map.get_mappings();
 
         return new_almanac_map;
     }
 
     pub fn get_destination(&self, input: usize) -> usize {
-        match self.source_map_mappings.contains_key(&input) {
-            true => {
-                return self.source_map_mappings[&input];
-            }
-            false => return input,
-        }
-    }
-
-    fn get_mappings(&mut self) {
-        let mut mappings: HashMap<usize, usize> = HashMap::new();
-        for source_map in &self.source_maps {
-            for i in 0..source_map[2] {
-                mappings.insert(source_map[1] + i, source_map[0] + i);
+        for source_map in self.source_maps.iter() {
+            match (source_map[1]..source_map[1] + source_map[2]).contains::<usize>(&input) {
+                true => {
+                    return input - source_map[1] + source_map[0];
+                }
+                false => continue,
             }
         }
-        self.source_map_mappings = mappings;
+        return input;
     }
 }
