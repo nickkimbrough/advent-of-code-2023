@@ -67,20 +67,23 @@ fn main() {
         println!("Answer: {winning_card_score_sum}");
 
         // Part 2
+        let initial_card_count: usize = cards.len();
         loop {
             let mut new_cards: Vec<Card> = vec![];
             for card in cards.iter_mut() {
                 if !card.processed {
                     for i in 0..card.winning_numbers_count {
-                        let winners = &card.winners;
-                        let card_numbers = &card.card_numbers;
-                        new_cards.push(Card::new(
-                            card.number + i,
-                            winners.to_vec(),
-                            card_numbers.to_vec(),
-                        ));
-                        card.processed = true;
+                        if card.number + i <= initial_card_count {
+                            let winners = &card.winners;
+                            let card_numbers = &card.card_numbers;
+                            new_cards.push(Card::new(
+                                card.number + i,
+                                winners.to_vec(),
+                                card_numbers.to_vec(),
+                            ));
+                        }
                     }
+                    card.processed = true;
                 }
             }
             match new_cards.len() > 0 {

@@ -1,7 +1,9 @@
 {
-    "rust-analyzer.linkedProjects": [".\\day1\\Cargo.toml"],
-    "rust-analyzer.linkedProjects": [".\\day2\\Cargo.toml"],
-    "rust-analyzer.linkedProjects": [".\\day3\\Cargo.toml"],
-    "rust-analyzer.linkedProjects": [".\\day4\\Cargo.toml"],
+    "rust-analyzer.linkedProjects": [
+        ".\\day1\\Cargo.toml",
+        ".\\day2\\Cargo.toml",
+        ".\\day3\\Cargo.toml",
+        ".\\day4\\Cargo.toml",
+    ],
     "editor.formatOnSave": true
 }
