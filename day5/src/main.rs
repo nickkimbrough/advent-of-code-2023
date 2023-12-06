@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::fs::File;
 use std::io::{self, BufRead};
 use std::path::Path;
@@ -20,6 +21,7 @@ fn main() {
 
     if let Ok(lines) = read_lines(input_file) {
         let mut source_maps: Vec<[usize; 3]> = vec![];
+        let mut map_id_counter: usize = 0;
         for line in lines {
             if let Ok(ip) = line {
                 if ip.starts_with("seeds: ") {
@@ -30,8 +32,10 @@ fn main() {
                         .collect::<Vec<usize>>();
                 } else if ip.ends_with(":") {
                     if source_maps.len() > 0 {
-                        let new_map: AlmanacMap = AlmanacMap::new(source_maps.clone());
-                        maps.push(new_map)
+                        let new_map: AlmanacMap =
+                            AlmanacMap::new(map_id_counter, source_maps.clone());
+                        maps.push(new_map);
+                        map_id_counter += 1;
                     }
                     source_maps.clear();
                 } else if ip.len() > 0 {
@@ -43,14 +47,14 @@ fn main() {
                 }
             }
         }
-        let new_map: AlmanacMap = AlmanacMap::new(source_maps.clone());
+        let new_map: AlmanacMap = AlmanacMap::new(map_id_counter, source_maps.clone());
         maps.push(new_map);
     }
 
     // Part 1
     let mut final_locations: Vec<usize> = vec![];
-    for seed in seeds {
-        let mut final_location = seed;
+    for seed in seeds.iter() {
+        let mut final_location = *seed;
         for map in &maps {
             final_location = map.get_destination(final_location);
         }
@@ -59,6 +63,39 @@ fn main() {
 
     let answer = final_locations.iter().min().unwrap().to_string();
     println!("{answer}");
+
+    // Part 2
+    let mut seeds_part_2: Vec<usize> = vec![];
+    while seeds.len() > 0 {
+        let range = seeds.pop().unwrap();
+        let seed = seeds.pop().unwrap();
+        seeds_part_2.append(&mut (seed..seed + range).collect());
+    }
+
+    let mut part_2_answer: usize = usize::MAX;
+    let mut previous_solutions: HashMap<[usize; 2], usize> = HashMap::new();
+    for seed in seeds_part_2.iter() {
+        let mut final_location = *seed;
+        let mut current_steps: Vec<[usize; 2]> = vec![];
+
+        for map in &maps {
+            current_steps.push([final_location, map.id]);
+            let potential_solution = [final_location, map.id];
+            if previous_solutions.contains_key(&potential_solution) {
+                final_location = *previous_solutions.get(&potential_solution).unwrap();
+                break;
+            }
+            final_location = map.get_destination(final_location);
+        }
+        for current_step in current_steps {
+            previous_solutions.insert(current_step, final_location);
+        }
+        if final_location < part_2_answer {
+            part_2_answer = final_location;
+        }
+    }
+
+    println!("{part_2_answer}");
 }
 
 fn read_lines<P>(filename: P) -> io::Result<io::Lines<io::BufReader<File>>>
@@ -70,19 +107,22 @@ where
 }
 
 struct AlmanacMap {
+    id: usize,
     source_maps: Vec<[usize; 3]>,
 }
 
 impl AlmanacMap {
     fn default() -> AlmanacMap {
         AlmanacMap {
+            id: 0,
             source_maps: vec![],
         }
     }
 
-    pub fn new(source_maps: Vec<[usize; 3]>) -> Self {
+    pub fn new(id: usize, source_maps: Vec<[usize; 3]>) -> Self {
         let mut new_almanac_map: AlmanacMap = AlmanacMap::default();
 
+        new_almanac_map.id = id;
         new_almanac_map.source_maps = source_maps;
 
         return new_almanac_map;
