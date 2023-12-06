@@ -87,7 +87,7 @@ fn main() {
             }
             final_location = map.get_destination(final_location);
         }
-        for current_step in current_steps {
+        for current_step in current_steps.iter().skip(1).collect() {
             previous_solutions.insert(current_step, final_location);
         }
         if final_location < part_2_answer {
