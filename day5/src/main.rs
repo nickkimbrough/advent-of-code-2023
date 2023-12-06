@@ -1,4 +1,3 @@
-use std::collections::HashMap;
 use std::fs::File;
 use std::io::{self, BufRead};
 use std::path::Path;
@@ -73,25 +72,16 @@ fn main() {
     }
 
     let mut part_2_answer: usize = usize::MAX;
-    let mut previous_solutions: HashMap<[usize; 2], usize> = HashMap::new();
-    for seed in seeds_part_2.iter() {
-        let mut final_location = *seed;
+
+    while let Some(mut seed) = seeds_part_2.pop() {
         let mut current_steps: Vec<[usize; 2]> = vec![];
 
         for map in &maps {
-            current_steps.push([final_location, map.id]);
-            let potential_solution = [final_location, map.id];
-            if previous_solutions.contains_key(&potential_solution) {
-                final_location = *previous_solutions.get(&potential_solution).unwrap();
-                break;
-            }
-            final_location = map.get_destination(final_location);
+            current_steps.push([seed, map.id]);
+            seed = map.get_destination(seed);
         }
-        for current_step in current_steps.iter().skip(1).collect() {
-            previous_solutions.insert(current_step, final_location);
-        }
-        if final_location < part_2_answer {
-            part_2_answer = final_location;
+        if seed < part_2_answer {
+            part_2_answer = seed;
         }
     }
 
