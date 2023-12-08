@@ -60,37 +60,40 @@ fn main() {
     // println!("Step 1 steps taken: {steps_taken}");
 
     // Part 2
-    let mut steps_taken_2: usize = 0;
+    let mut steps_to_z: Vec<usize> = vec![];
+
     let mut current_nodes = map_nodes
         .iter()
         .filter(|x| x.0.ends_with('A'))
         .map(|x| x.0.to_string())
         .collect::<Vec<String>>();
 
-    'outer: loop {
-        for direction in directions.iter() {
-            let mut next_nodes: Vec<String> = vec![];
-            for current_node in current_nodes.iter() {
+    for current_node in current_nodes.iter() {
+        let mut inner_node = current_node.to_string();
+        let mut steps_taken_2: usize = 0;
+        'outer: loop {
+            for direction in directions.iter() {
                 let next_node = match direction.as_str() {
-                    "L" => &map_nodes.get(current_node).unwrap()[0],
-                    "R" => &map_nodes.get(current_node).unwrap()[1],
+                    "L" => &map_nodes.get(&inner_node).unwrap()[0],
+                    "R" => &map_nodes.get(&inner_node).unwrap()[1],
                     _ => panic!("Bad Directions!"),
                 };
 
-                next_nodes.push(next_node.to_string());
+                steps_taken_2 += 1;
+
+                if next_node.ends_with("Z") {
+                    break 'outer;
+                }
+
+                inner_node = next_node.to_string();
             }
-
-            steps_taken_2 += 1;
-
-            if next_nodes.iter().filter(|x| x.ends_with("Z")).count() == next_nodes.len() {
-                break 'outer;
-            }
-
-            current_nodes = next_nodes;
         }
+        steps_to_z.push(steps_taken_2);
     }
 
-    println!("Step 2 steps taken: {steps_taken_2}");
+    let part_2_answer = lcm(&steps_to_z);
+
+    println!("Step 2 steps taken: {part_2_answer}");
 }
 
 fn read_lines<P>(filename: P) -> io::Result<io::Lines<io::BufReader<File>>>
@@ -99,4 +102,22 @@ where
 {
     let file = File::open(filename)?;
     Ok(io::BufReader::new(file).lines())
+}
+
+// LCM algorithms taken from https://github.com/TheAlgorithms/Rust/blob/master/src/math/lcm_of_n_numbers.rs
+
+pub fn lcm(nums: &[usize]) -> usize {
+    if nums.len() == 1 {
+        return nums[0];
+    }
+    let a = nums[0];
+    let b = lcm(&nums[1..]);
+    a * b / gcd_of_two_numbers(a, b)
+}
+
+fn gcd_of_two_numbers(a: usize, b: usize) -> usize {
+    if b == 0 {
+        return a;
+    }
+    gcd_of_two_numbers(b, a % b)
 }
