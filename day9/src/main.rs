@@ -91,6 +91,35 @@ fn main() {
         .map(|x| *x.last().unwrap().last().unwrap())
         .sum();
     println!("Part 1 Answer: {answer}");
+
+    // Part 2
+    let mut extrapolated_sequences_2: Vec<Vec<Vec<i64>>> = vec![];
+
+    for generated_sequence in generated_sequences.iter_mut() {
+        let mut extrapolated_sequence: Vec<Vec<i64>> = vec![];
+
+        let mut extrapolated_sequence_row: Vec<i64> = generated_sequence.last().unwrap().to_vec();
+        extrapolated_sequence_row.push(0);
+        extrapolated_sequence.push(extrapolated_sequence_row);
+
+        for mut remaining_row in generated_sequence.iter_mut().rev().skip(1) {
+            let first_number = *remaining_row.first().unwrap();
+            let difference_number = *extrapolated_sequence.last().unwrap().first().unwrap();
+            let mut new_remaining_row: Vec<i64> = vec![];
+            new_remaining_row.push(first_number - difference_number);
+            new_remaining_row.extend_from_slice(&remaining_row);
+
+            remaining_row = &mut new_remaining_row;
+            extrapolated_sequence.push(remaining_row.to_vec());
+        }
+        extrapolated_sequences_2.push(extrapolated_sequence);
+    }
+
+    let answer2: i64 = extrapolated_sequences_2
+        .iter()
+        .map(|x| *x.last().unwrap().first().unwrap())
+        .sum();
+    println!("Part 2 Answer: {answer2}");
 }
 
 fn read_lines<P>(filename: P) -> io::Result<io::Lines<io::BufReader<File>>>
