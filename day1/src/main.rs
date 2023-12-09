@@ -9,7 +9,7 @@ fn main() {
     // Read the file and iterate over every line
     if let Ok(lines) = read_lines("src/input.txt") {
         for line in lines {
-            if let Ok(mut ip) = line {
+            if let Ok(ip) = line {
                 if part == 1 {
                     // Filter out any non numerical characters
                     let re = Regex::new(r"[A-Za-z]").unwrap();

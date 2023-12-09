@@ -62,7 +62,7 @@ fn main() {
     // Part 2
     let mut steps_to_z: Vec<usize> = vec![];
 
-    let mut current_nodes = map_nodes
+    let current_nodes = map_nodes
         .iter()
         .filter(|x| x.0.ends_with('A'))
         .map(|x| x.0.to_string())
