@@ -50,10 +50,6 @@ fn main() {
                 let first_value = last_steps.next().unwrap();
                 // only grab second value if it exists
                 if last_steps.peek() != None {
-                    /*
-                    10  13  16  21  30  45  68
-                      3  3  5  9  15  23
-                     */
                     let second_value = last_steps.peek().unwrap();
                     next_steps.push(*second_value - first_value);
                 }
@@ -65,7 +61,6 @@ fn main() {
 
     // We have the tree now, we need to extrapolate it
     // Start by adding a zero to the last row.
-
     let mut extrapolated_sequences: Vec<Vec<Vec<i64>>> = vec![];
 
     for generated_sequence in generated_sequences.iter_mut() {
